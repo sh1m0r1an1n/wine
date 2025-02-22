@@ -1,7 +1,7 @@
 env/
 .vscode/
 .idea/
-*.replit
+.replit
 index.html
 
 ### main template
