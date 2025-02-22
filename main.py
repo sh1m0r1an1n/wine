@@ -1,6 +1,10 @@
 from datetime import datetime
+from pprint import PrettyPrinter
+
 import pandas as pd
 import numpy
+import configargparse
+import os
 from collections import defaultdict
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
@@ -9,36 +13,29 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 def read_wine_data(file_path):
     """Чтение данных о винах из Excel-файла."""
-    try:
-        df = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
-        return df.to_dict(orient='records')
-    except FileNotFoundError:
-        raise ValueError(f"Файл {file_path} не найден!"
-                         f"Файл должен быть 'wine3.xlsx', лист 'Лист1'.")
-    except Exception as e:
-        raise ValueError(f"Ошибка при чтении файла: {e}")
+    df = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
+    return df.to_dict(orient='records'), df
 
 
 def group_wines_by_category(wine_records):
-    categories = {record['Категория'] for record in wine_records}
     wines_by_category = defaultdict(list)
 
-    for category in categories:
-        for record in wine_records:
-            if record['Категория'] == category:
-                wines_by_category[category].append({
-                    "image": f"images/{record['Картинка']}",
-                    "title": record['Название'],
-                    "sort": record['Сорт'],
-                    "price": record['Цена'],
-                    "category": record['Категория'],
-                    "action": record['Акция']
-                })
+    for record in wine_records:
+        category = record['Категория']
+        wines_by_category[category].append({
+            "image": f"images/{record['Картинка']}",
+            "title": record['Название'],
+            "sort": record['Сорт'],
+            "price": record['Цена'],
+            "category": record['Категория'],
+            "action": record['Акция']
+        })
     return wines_by_category
 
 
-def calculate_winery_age(founding_year):
+def calculate_winery_age():
     """Вычисление возраста винодельни."""
+    founding_year = 1920
     current_year = datetime.now().year
     winery_age = current_year - founding_year
     format_years = 'лет' if 11 <= winery_age % 100 <= 14 else (
@@ -49,16 +46,36 @@ def calculate_winery_age(founding_year):
 
 def main():
     """Основная функция для генерации HTML-страницы."""
+    parser = configargparse.ArgumentParser(
+        default_config_files=['config.ini'],
+        description="Программа генерирует HTML-страницу с винами из Excel"
+    )
+    parser.add_argument(
+        "--path",
+        type=str,
+        help="Путь до Excel-файла с данными о винах (по умолчанию wine.xlsx)",
+        default="wine.xlsx"
+    )
+    args, unknown_args = parser.parse_known_args()
+    file_path = args.path
+
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
 
-    wine_records = read_wine_data("wine3.xlsx")
-    wines_by_category = group_wines_by_category(wine_records)
-
-    winery_age, format_years = calculate_winery_age(1920)
+    try:
+        wine_records, df = read_wine_data(file_path)
+        wines_by_category = group_wines_by_category(wine_records)
+        winery_age, format_years = calculate_winery_age()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл '{file_path}' не найден.")
+    except ValueError as e:
+        if "Excel file format cannot be determined" in str(e):
+            raise ValueError("Формат файла не Excel.")
+        if "Worksheet named 'Лист1' not found" in str(e):
+            raise ValueError("'Лист1' в Excel файле не найден.")
 
     rendered_page = template.render(
         winery_age=winery_age,

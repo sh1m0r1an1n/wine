@@ -3,6 +3,8 @@ env/
 .idea/
 .replit
 index.html
+.venv/
+*.xlsx
 
 ### main template
 # Byte-compiled / optimized / DLL files
