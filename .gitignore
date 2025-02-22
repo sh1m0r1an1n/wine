@@ -1,7 +1,8 @@
 env/
 .vscode/
 .idea/
-.replit
+*.replit
+index.html
 
 ### main template
 # Byte-compiled / optimized / DLL files
