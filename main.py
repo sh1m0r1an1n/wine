@@ -1,10 +1,8 @@
 from datetime import datetime
-from pprint import PrettyPrinter
 
 import pandas as pd
 import numpy
 import configargparse
-import os
 from collections import defaultdict
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
@@ -69,6 +67,18 @@ def main():
         wine_records, df = read_wine_data(file_path)
         wines_by_category = group_wines_by_category(wine_records)
         winery_age, format_years = calculate_winery_age()
+
+        rendered_page = template.render(
+            winery_age=winery_age,
+            format_years=format_years,
+            wines_by_category=wines_by_category
+        )
+
+        with open('index.html', 'w', encoding="utf8") as file:
+            file.write(rendered_page)
+
+        server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
+        server.serve_forever()
     except FileNotFoundError:
         raise FileNotFoundError(f"Файл '{file_path}' не найден.")
     except ValueError as e:
@@ -76,18 +86,6 @@ def main():
             raise ValueError("Формат файла не Excel.")
         if "Worksheet named 'Лист1' not found" in str(e):
             raise ValueError("'Лист1' в Excel файле не найден.")
-
-    rendered_page = template.render(
-        winery_age=winery_age,
-        format_years=format_years,
-        wines_by_category=wines_by_category
-    )
-
-    with open('index.html', 'w', encoding="utf8") as file:
-        file.write(rendered_page)
-
-    server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
-    server.serve_forever()
 
 
 if __name__ == '__main__':
