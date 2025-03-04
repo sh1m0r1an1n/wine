@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 def read_wine_data(file_path):
     """Чтение данных о винах из Excel-файла."""
     wine_dataframe = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
-    return wine_dataframe.to_dict(orient='records'), wine_dataframe
+    return wine_dataframe.to_dict(orient='records')
 
 
 def group_wines_by_category(wine_records):
@@ -30,7 +30,7 @@ def group_wines_by_category(wine_records):
 
 
 def calculate_winery_age():
-    """Вычисление возраста винодельни."""
+    """Возвращает возраст винодельни и правильное склонение слова 'год'."""
     founding_year = 1920
     current_year = datetime.now().year
     winery_age = current_year - founding_year
@@ -52,7 +52,7 @@ def main():
         help="Путь до Excel-файла с данными о винах (по умолчанию wine.xlsx)",
         default="wine.xlsx"
     )
-    args, unknown_args = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
     file_path = args.path
 
     env = Environment(
@@ -62,7 +62,7 @@ def main():
     template = env.get_template('template.html')
 
     try:
-        wine_records, wine_dataframe = read_wine_data(file_path)
+        wine_records = read_wine_data(file_path)
         wines_by_category = group_wines_by_category(wine_records)
         winery_age, format_years = calculate_winery_age()
 
@@ -78,12 +78,12 @@ def main():
         server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
         server.serve_forever()
     except FileNotFoundError as e:
-        raise FileNotFoundError(f"Файл '{file_path}' не найден: {e}.")
+        raise FileNotFoundError(f"Файл '{file_path}' не найден.") from e
     except ValueError as e:
         if "Excel file format cannot be determined" in str(e):
-            raise ValueError("Формат файла не Excel.")
+            raise ValueError("Формат файла не Excel.") from e
         if "Worksheet named 'Лист1' not found" in str(e):
-            raise ValueError("'Лист1' в Excel файле не найден.")
+            raise ValueError("'Лист1' в Excel файле не найден.") from e
 
 
 if __name__ == '__main__':
