@@ -11,8 +11,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 def read_wine_data(file_path):
     """Чтение данных о винах из Excel-файла."""
-    df = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
-    return df.to_dict(orient='records'), df
+    wine_dataframe = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
+    return wine_dataframe.to_dict(orient='records'), wine_dataframe
 
 
 def group_wines_by_category(wine_records):
