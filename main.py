@@ -1,11 +1,9 @@
 from datetime import datetime
-
+from collections import defaultdict
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import pandas as pd
 import numpy
 import configargparse
-from collections import defaultdict
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
@@ -64,7 +62,7 @@ def main():
     template = env.get_template('template.html')
 
     try:
-        wine_records, df = read_wine_data(file_path)
+        wine_records, wine_dataframe = read_wine_data(file_path)
         wines_by_category = group_wines_by_category(wine_records)
         winery_age, format_years = calculate_winery_age()
 
@@ -79,8 +77,8 @@ def main():
 
         server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
         server.serve_forever()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл '{file_path}' не найден.")
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Файл '{file_path}' не найден: {e}.")
     except ValueError as e:
         if "Excel file format cannot be determined" in str(e):
             raise ValueError("Формат файла не Excel.")
