@@ -9,7 +9,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 def read_wine_data(file_path):
     """Чтение данных о винах из Excel-файла."""
-    wine_dataframe = pd.read_excel(file_path, sheet_name="Лист1").replace({numpy.nan: None})
+    wine_dataframe = pd.read_excel(
+        file_path,
+        sheet_name="Лист1"
+    ).replace({numpy.nan: None})
     return wine_dataframe.to_dict(orient='records')
 
 
