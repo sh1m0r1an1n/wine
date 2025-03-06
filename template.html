@@ -130,7 +130,7 @@
                   <div>
                     <h3 class="heading mt-3 mb-3 text-dark">{{wine.title}}</h3>
                     <p>
-                      {% if category != "Напитки" %}
+                      {% if wine.sort %}
                         Сорт винограда - {{wine.sort}}<br/>
                       {% endif %}
                       <span class="price">{{wine.price}} р.</span>
