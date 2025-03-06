@@ -68,18 +68,6 @@ def main():
         wine_records = read_wine_data(file_path)
         wines_by_category = group_wines_by_category(wine_records)
         winery_age, format_years = calculate_winery_age()
-
-        rendered_page = template.render(
-            winery_age=winery_age,
-            format_years=format_years,
-            wines_by_category=wines_by_category
-        )
-
-        with open('index.html', 'w', encoding="utf8") as file:
-            file.write(rendered_page)
-
-        server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
-        server.serve_forever()
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Файл '{file_path}' не найден.") from e
     except ValueError as e:
@@ -87,6 +75,18 @@ def main():
             raise ValueError("Формат файла не Excel.") from e
         if "Worksheet named 'Лист1' not found" in str(e):
             raise ValueError("'Лист1' в Excel файле не найден.") from e
+
+    rendered_page = template.render(
+        winery_age=winery_age,
+        format_years=format_years,
+        wines_by_category=wines_by_category
+    )
+
+    with open('index.html', 'w', encoding="utf8") as file:
+        file.write(rendered_page)
+
+    server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
+    server.serve_forever()
 
 
 if __name__ == '__main__':
