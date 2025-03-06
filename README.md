@@ -6,7 +6,8 @@
 [Скачайте Python](https://www.python.org/downloads/) → запустите установку →  
 ✅ Обязательно отметьте **Add Python to PATH**.
 
-### ⚙️ **2. Настройте файл `config.ini`**:
+### ⚙️ **2. Укажите свой путь к файлу (если нужно)**:
+- Создайте файл `config.ini`
 ```ini
 [DEFAULT]
 path = путь/к/вашей/папке/wine.xlsx  # Путь к вашему Excel-файлу
