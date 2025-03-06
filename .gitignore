@@ -5,6 +5,7 @@ env/
 index.html
 .venv/
 *.xlsx
+config.ini
 
 ### main template
 # Byte-compiled / optimized / DLL files
